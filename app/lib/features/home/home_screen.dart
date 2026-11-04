@@ -508,7 +508,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         for (var i = 0; i < tools.length; i++) {
           _tools[tools[i]] = Offset(w * (i + 0.5) / buttons, toolsY);
         }
-        _tools[Carry.shower] = Offset(w * 1.5 / buttons, toolsY - 84);
+        _tools[Carry.shower] = Offset(w * 0.5 / buttons + 6, toolsY - 96);
         final rightX = w - 16 - 96;
         final feast = g.feastReady(now) || (_feastOpenedAt != null && _t - _feastOpenedAt! < 4);
 

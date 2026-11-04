@@ -62,6 +62,7 @@ class _HatchOverlayState extends ConsumerState<HatchOverlay> with TickerProvider
     sounds.play(Sfx.celebrate);
     await _open.forward();
     if (!mounted) return;
+    setState(() {});
     _say(Strings.hello(widget.species));
     await Future<void>.delayed(const Duration(milliseconds: 1400));
     if (mounted) setState(() => _naming = true);
