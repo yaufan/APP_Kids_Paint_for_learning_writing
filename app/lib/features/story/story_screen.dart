@@ -10,6 +10,7 @@ import '../../app/widgets.dart';
 import '../../core/pets.dart';
 import '../../core/providers.dart';
 import '../../core/sounds.dart';
+import '../../core/voice.dart';
 
 /// The opening story: the picture book opens on the pet house at the edge
 /// of the letter forest, eggs appear at its door, and the child takes one
@@ -27,17 +28,22 @@ class _StoryScreenState extends ConsumerState<StoryScreen> {
 
   bool get _picking => _page >= Strings.storyPages.length;
 
+  late final Sounds _sounds;
+  late final Voice _voice;
+
   @override
   void initState() {
     super.initState();
-    ref.read(soundsProvider).hold(this, Music.homeLand);
+    _sounds = ref.read(soundsProvider);
+    _voice = ref.read(voiceProvider);
+    _sounds.hold(this, Music.homeLand);
     WidgetsBinding.instance.addPostFrameCallback((_) => _read());
   }
 
   @override
   void dispose() {
-    ref.read(soundsProvider).release(this);
-    ref.read(voiceProvider).stop();
+    _sounds.release(this);
+    _voice.stop();
     super.dispose();
   }
 
@@ -87,6 +93,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen> {
     return GestureDetector(
       key: ValueKey('page-$_page'),
       behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
       onTap: _turn,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -127,7 +134,6 @@ class _StoryScreenState extends ConsumerState<StoryScreen> {
 
   Widget _eggs(BuildContext context) {
     final picked = _picked;
-    final full = ref.watch(gameProvider.select((g) => g.settings.full));
     return LayoutBuilder(
       key: const ValueKey('eggs'),
       builder: (context, box) {
@@ -148,15 +154,12 @@ class _StoryScreenState extends ConsumerState<StoryScreen> {
                       species: s,
                       size: egg,
                       picked: picked == s,
-                      // The free version has one pet; it can be any of them.
-                      locked: false,
                       onTap: () => _pick(s),
                     ),
                 ],
               ),
             ),
           ),
-          if (!full) const SizedBox.shrink(),
           Padding(
             padding: const EdgeInsets.only(bottom: 24, top: 8),
             child: AnimatedOpacity(
@@ -180,18 +183,18 @@ class _StoryScreenState extends ConsumerState<StoryScreen> {
 }
 
 class _Egg extends StatelessWidget {
-  const _Egg({required this.species, required this.size, required this.picked, required this.locked, required this.onTap});
+  const _Egg({required this.species, required this.size, required this.picked, required this.onTap});
 
   final Species species;
   final double size;
   final bool picked;
-  final bool locked;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final egg = SizedBox(width: size, height: size * 1.2, child: Art('eggs/${species.name}'));
     return Semantics(
+      container: true,
       button: true,
       selected: picked,
       label: Strings.eggOf(species),

@@ -17,7 +17,6 @@ abstract final class Strings {
   static const pickEgg = '選一顆蛋';
   static String eggOf(Species s) => '${s.zh}的蛋';
   static String takeHome(Species s) => '帶${s.zh}的蛋回家';
-  static const lockedEgg = '完整版的蛋';
 
   // Home.
   static const write = '寫字';
@@ -60,7 +59,7 @@ abstract final class Strings {
   static String hi(String name) => '你好，我是$name！';
 
   // Growing up.
-  static String grewUp(String name, Stage s) => '$name長大了！變成${s.zh}了';
+  static String grewUp(String name, Stage s) => '$name長大了！\n變成${s.zh}了';
   static String newPower(Stage s) => switch (s) {
         Stage.toddler => '會說話了：寫字的時候會幫你加油，還會念字母和數字給你聽。',
         _ => '',

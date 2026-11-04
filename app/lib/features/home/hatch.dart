@@ -23,22 +23,24 @@ class HatchOverlay extends ConsumerStatefulWidget {
   ConsumerState<HatchOverlay> createState() => _HatchOverlayState();
 }
 
-class _HatchOverlayState extends ConsumerState<HatchOverlay> with SingleTickerProviderStateMixin {
+class _HatchOverlayState extends ConsumerState<HatchOverlay> with TickerProviderStateMixin {
   late final _shake = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
   late final _open = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
   var _cracks = 0;
   var _naming = false;
+  late final Sounds _sounds;
 
   @override
   void initState() {
     super.initState();
-    ref.read(soundsProvider).hold(this, Music.play);
+    _sounds = ref.read(soundsProvider);
+    _sounds.hold(this, Music.play);
     WidgetsBinding.instance.addPostFrameCallback((_) => _say(Strings.hatching));
   }
 
   @override
   void dispose() {
-    ref.read(soundsProvider).release(this);
+    _sounds.release(this);
     _shake.dispose();
     _open.dispose();
     super.dispose();
@@ -107,6 +109,8 @@ class _HatchOverlayState extends ConsumerState<HatchOverlay> with SingleTickerPr
             Expanded(
               child: Center(
                 child: Semantics(
+                  key: const ValueKey('hatch-egg'),
+                  container: true,
                   button: true,
                   label: Strings.hatching,
                   excludeSemantics: true,

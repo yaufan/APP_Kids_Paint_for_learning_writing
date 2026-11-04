@@ -22,11 +22,13 @@ class LettersScreen extends ConsumerStatefulWidget {
 
 class _LettersScreenState extends ConsumerState<LettersScreen> {
   final _next = GlobalKey();
+  late final Sounds _sounds;
 
   @override
   void initState() {
     super.initState();
-    ref.read(soundsProvider).hold(this, Music.write);
+    _sounds = ref.read(soundsProvider);
+    _sounds.hold(this, Music.write);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (ref.read(gameProvider).settings.voice) ref.read(voiceProvider).say(Strings.pickLetter);
@@ -37,7 +39,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen> {
 
   @override
   void dispose() {
-    ref.read(soundsProvider).release(this);
+    _sounds.release(this);
     super.dispose();
   }
 
@@ -109,6 +111,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final (color, line) = _colors[glyph.id.codeUnitAt(0) % _colors.length];
     final card = Semantics(
+      container: true,
       button: true,
       label: Strings.glyphLabel(glyph),
       excludeSemantics: true,

@@ -24,14 +24,17 @@ class ParentScreen extends ConsumerWidget {
 
     Widget section(String title, List<Widget> children) => Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontSize: 15, color: Book.inkSoft, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              ...children,
-            ]),
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontSize: 15, color: Book.inkSoft, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                ...children,
+              ]),
+            ),
           ),
         );
 

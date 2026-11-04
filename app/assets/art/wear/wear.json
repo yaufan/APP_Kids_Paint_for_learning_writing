@@ -1,0 +1,12 @@
+{
+  "bib": {
+    "x": 60,
+    "y": 24,
+    "note": "neck: just below pets.json mouth"
+  },
+  "cap": {
+    "x": 60,
+    "y": 90,
+    "note": "band: on the top of pets.json head (cy - r * 0.8)"
+  }
+}

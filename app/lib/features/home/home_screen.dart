@@ -68,6 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   Offset? _carryAt;
   double _carryStep = 0;
   ({Carry what, double start, Offset from})? _auto;
+  int _autoSteps = 0;
   bool _soapy = false;
   int _brushed = 0;
 
@@ -89,6 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
+    _sounds = ref.read(soundsProvider);
     _ticker = createTicker(_tick)..start();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -102,13 +104,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   void dispose() {
     _ticker.dispose();
     _clock.dispose();
-    ref.read(soundsProvider).release(this);
+    _sounds.release(this);
     super.dispose();
   }
 
   DateTime get _now => ref.read(clockProvider)();
   GameNotifier get _game => ref.read(gameProvider.notifier);
-  Sounds get _sounds => ref.read(soundsProvider);
+  late final Sounds _sounds;
 
   void _tick(Duration elapsed) {
     final t = elapsed.inMicroseconds / 1e6;
@@ -362,6 +364,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   void _startAuto(Carry c) {
     if (c == Carry.shower && !_soapy) return;
     _auto = (what: c, start: _t, from: _tools[c] ?? _petRect.center);
+    _autoSteps = 0;
     _carryStep = 0;
     _brushed = 0;
   }
@@ -382,19 +385,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         final lift = (age / 0.35).clamp(0.0, 1.0);
         final scrub = body + Offset(math.sin(age * 9) * _petRect.width * 0.25, math.cos(age * 4) * _petRect.height * 0.15);
         final at = Offset.lerp(a.from, a.what == Carry.shower ? _petRect.topCenter + const Offset(0, -10) : scrub, Curves.easeOut.transform(lift))!;
-        _carryStep += ((at - (_carryAt ?? at)).distance);
         _carryAt = at;
         if (lift >= 1) {
-          if (a.what == Carry.shower) {
-            if (_carryStep > 12) {
-              _carryStep = 0;
-              _particles.drops(at + Offset(math.sin(age * 5) * 30, 30), 70, t);
+          // A step of the job every so often, however fast the frames come.
+          final want = ((age - 0.35) / (a.what == Carry.shower ? 0.12 : 0.08)).floor();
+          while (_autoSteps < want && _auto != null) {
+            _autoSteps++;
+            if (a.what == Carry.shower) {
+              _particles.drops(at + Offset(math.sin(_autoSteps * 1.7) * 30, 30), 70, t);
               final foam = _particles.all.where((p) => p.kind == Bit.foam).toList();
               if (foam.isNotEmpty) _rinseNear(foam.first.at);
+            } else {
+              _carryStep = 100;
+              final jitter = Offset(math.sin(_autoSteps * 2.3), math.cos(_autoSteps * 1.3)) * _petRect.width * 0.18;
+              _useOnPet(a.what, at + jitter);
             }
-            _carryStep += 4;
-          } else {
-            _useOnPet(a.what, at);
           }
         }
         final done = switch (a.what) {
@@ -536,6 +541,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 width: 120,
                 height: 100,
                 child: Semantics(
+                  container: true,
                   button: true,
                   label: Strings.feast,
                   excludeSemantics: true,
@@ -554,6 +560,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               top: pad.top + 8,
               child: Row(children: [
                 Semantics(
+                  container: true,
                   button: true,
                   label: Strings.parent,
                   excludeSemantics: true,
@@ -583,18 +590,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               top: pad.top + 76,
               width: 96,
               child: Column(children: [
-                _WriteButton(pulse: !g.hatched || g.today(now).right == 0, onTap: () => context.push('/letters')),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  decoration: BoxDecoration(color: Book.paper.withValues(alpha: 0.82), borderRadius: BorderRadius.circular(14)),
-                  child: StarSlots(stars: g.stars, size: 24),
+                Wash(
+                  color: Book.paper,
+                  line: Book.paperGrain,
+                  radius: 24,
+                  padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+                  child: Column(children: [
+                    _WriteButton(pulse: !g.hatched || g.today(now).right == 0, onTap: () => context.push('/letters')),
+                    const SizedBox(height: 6),
+                    StarSlots(stars: g.stars, size: 26),
+                  ]),
                 ),
                 const SizedBox(height: 10),
                 if (g.cookies.isNotEmpty && g.hatched)
                   Listener(
                     onPointerDown: (e) => _startCarry(Carry.cookie, e),
                     child: Semantics(
+                      container: true,
                       button: true,
                       label: Strings.cookieWith(g.cookies.first),
                       excludeSemantics: true,
@@ -618,8 +630,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: pad.bottom + 12,
-                height: 92,
+                bottom: pad.bottom + 8,
+                height: 104,
                 child: Row(children: [
                   if (_sleeping) ...[
                     const Spacer(flex: 2),
@@ -712,7 +724,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             scaleY: breathe * pose.scale,
             scaleX: pose.scale,
             alignment: Alignment.bottomCenter,
-            child: PetView(art: art, width: _petRect.width, mood: mood, lookAt: look),
+            child: PetView(art: art, width: _petRect.width, mood: mood, lookAt: look, bib: g.stage == Stage.baby),
           ),
         ),
       ));

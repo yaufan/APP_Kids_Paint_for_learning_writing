@@ -63,8 +63,8 @@ flutter:
     - assets/art/eggs/
     - assets/art/homes/
     - assets/art/items/
+    - assets/art/story/
     - assets/art/wear/
-    - assets/art/ui/
     - assets/sounds/
   fonts:
     - family: Huninn

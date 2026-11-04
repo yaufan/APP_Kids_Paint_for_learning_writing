@@ -13,6 +13,7 @@ import '../../core/glyphs.dart';
 import '../../core/pets.dart';
 import '../../core/providers.dart';
 import '../../core/sounds.dart';
+import '../../core/voice.dart';
 import '../../core/writing.dart';
 import '../home/meters.dart';
 import '../pet/pet_view.dart';
@@ -59,6 +60,8 @@ class _WriteScreenState extends ConsumerState<WriteScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
+    _sounds = ref.read(soundsProvider);
+    _voiceOut = ref.read(voiceProvider);
     _glyph = ref.read(glyphBookProvider).byId[widget.id] ?? ref.read(glyphBookProvider).all.first;
     _ticker = createTicker((e) {
       _clock.value = e.inMicroseconds / 1e6;
@@ -68,7 +71,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> with SingleTickerProv
       if (_say != null && _t > _sayUntil) setState(() => _say = null);
     })
       ..start();
-    ref.read(soundsProvider).hold(this, Music.write);
+    _sounds.hold(this, Music.write);
     WidgetsBinding.instance.addPostFrameCallback((_) => _go(Step.watch));
   }
 
@@ -78,12 +81,13 @@ class _WriteScreenState extends ConsumerState<WriteScreen> with SingleTickerProv
     _clock.dispose();
     _judgeLater?.cancel();
     _nextStep?.cancel();
-    ref.read(soundsProvider).release(this);
-    ref.read(voiceProvider).stop();
+    _sounds.release(this);
+    _voiceOut.stop();
     super.dispose();
   }
 
-  Sounds get _sounds => ref.read(soundsProvider);
+  late final Sounds _sounds;
+  late final Voice _voiceOut;
   bool get _talks => ref.read(gameProvider).hatched && ref.read(gameProvider).stage.index >= Stage.toddler.index;
 
   double get _watched => (_t - _watchStart) / 0.9;
@@ -385,6 +389,7 @@ class _StepChip extends StatelessWidget {
       Step.write => Strings.stepWrite,
     };
     return Semantics(
+      container: true,
       button: true,
       selected: on,
       label: label,
@@ -432,7 +437,7 @@ class _Buddy extends ConsumerWidget {
         }
         return Transform.translate(
           offset: Offset(0, hop),
-          child: PetView(art: ref.watch(petArtProvider)[s], width: 104, mood: t < happyUntil ? Mood.happy : Mood.open),
+          child: PetView(art: ref.watch(petArtProvider)[s], width: 104, mood: t < happyUntil ? Mood.happy : Mood.open, bib: g.stage == Stage.baby),
         );
       },
     );

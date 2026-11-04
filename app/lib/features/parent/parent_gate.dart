@@ -122,6 +122,7 @@ class _ParentGatePageState extends State<ParentGatePage> {
         );
     Widget key(String k) => Semantics(
           key: ValueKey('gate-key-$k'),
+          container: true,
           button: true,
           label: k == '⌫' ? Strings.backspace : k,
           excludeSemantics: true,

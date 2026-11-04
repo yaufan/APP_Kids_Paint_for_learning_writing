@@ -12,12 +12,16 @@ enum Mood { open, happy, sleep }
 /// The pet drawn [width] wide. With its eyes open it looks at [lookAt]
 /// (in this widget's own coordinates) and blinks now and then.
 class PetView extends StatefulWidget {
-  const PetView({super.key, required this.art, required this.width, this.mood = Mood.open, this.lookAt});
+  const PetView({super.key, required this.art, required this.width, this.mood = Mood.open, this.lookAt, this.bib = false});
 
   final PetArt art;
   final double width;
   final Mood mood;
   final Offset? lookAt;
+
+  /// A baby wears a bib (assets/art/wear/bib.svg: 120 square, the neck at
+  /// 60, 24).
+  final bool bib;
 
   double get height => width * art.size.height / art.size.width;
 
@@ -72,7 +76,24 @@ class _PetViewState extends State<PetView> with SingleTickerProviderStateMixin {
             animation: _blink,
             builder: (_, _) => CustomPaint(painter: EyesPainter(art, lookAt: widget.lookAt, closed: _blink.value)),
           ),
+        if (widget.bib) _bib(),
       ]),
+    );
+  }
+}
+
+extension on _PetViewState {
+  Widget _bib() {
+    final art = widget.art;
+    final k = widget.width / art.size.width;
+    final w = art.body.width * 0.7 * k;
+    final neck = Offset(art.mouth.dx, art.mouth.dy + art.headRadius * 0.34) * k;
+    return Positioned(
+      left: neck.dx - w / 2,
+      top: neck.dy - w * 0.2,
+      width: w,
+      height: w,
+      child: SvgPicture.asset('assets/art/wear/bib.svg', excludeFromSemantics: true),
     );
   }
 }

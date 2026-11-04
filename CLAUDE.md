@@ -38,7 +38,14 @@
 - 不能 commit：金鑰、密碼、不公開的文件。
 
 ## 和畫畫小鎮共用的做法（開始寫程式時照著做）
-- Flutter 3.47.8、Riverpod、drift、flutter_svg、audioplayers、flutter_tts。
+- Flutter 3.47.8、Riverpod、flutter_svg、audioplayers、flutter_tts。0.1 的存檔是一個 JSON 檔（`app/lib/core/store.dart`），沒有用 drift，所以本機跑測試**不用** sqlite 那段，直接 `flutter test`。
 - 觸控：用原始的手指事件（`Listener`），手指一碰就畫。不要用拖曳手勢，它要移動 36 點才開始，小朋友短短的一筆會不見。
 - 圖和聲音都用程式產生（SVG 用 Python 畫；聲音用 numpy 合成），不用別人的素材。
-- 本機測試：照畫畫小鎮的 `tools/run_tests.sh`，pubspec 的 sqlite 那段不能 commit。
+- 本機測試：在 `app/` 裡 `flutter test`（不含 `test/flow_test.dart`），`flutter analyze` 要零問題。以後加了 drift，才照畫畫小鎮的 `tools/run_tests.sh`（pubspec 的 sqlite 那段不能 commit）。
+- 完整流程和截圖：`flutter test test/flow_test.dart`，截圖在 `app/build/screenshots/`。
+
+## 程式在哪裡
+- `app/lib/core/`：字形（`glyphs.dart`）、判斷寫對（`writing.dart`）、寵物和成長規則（`pets.dart`、`game.dart`）、存檔、聲音、語音。
+- `app/lib/features/`：開場故事（`story`）、寵物的家（`home`）、選字（`letters`）、寫字四關（`write`）、家長關卡和家長模式（`parent`）。
+- 字形：`design/glyphs/glyphs.py` 產生 `app/assets/glyphs.json`，筆順規則在 `docs/letters.md`。
+- 圖：`design/art/`（Python 畫 SVG，繪本風格）；聲音：`design/sounds/make_sounds.py`。

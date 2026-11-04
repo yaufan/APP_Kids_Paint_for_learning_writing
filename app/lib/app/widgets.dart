@@ -236,9 +236,11 @@ class BookButton extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: size * 0.32, fontWeight: FontWeight.w700, color: Book.ink)),
     ]);
     return Semantics(
+      container: true,
       button: true,
       label: label,
       excludeSemantics: true,
+      onTap: onTap,
       child: Pressable(
         onTap: onTap,
         child: Opacity(
@@ -296,9 +298,11 @@ class CornerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
+        container: true,
         button: true,
         label: label,
         excludeSemantics: true,
+        onTap: onTap,
         child: Pressable(
           onTap: onTap,
           child: SizedBox(
