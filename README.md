@@ -6,8 +6,12 @@
 - 和「[畫畫小鎮](https://github.com/yaufan/APP_Kids_Paint)」是兄弟 APP：同一個作者、同一套技術；畫風不同，是繪本故事風格。
 - 不連網、不定位、沒有廣告、不賣東西、沒有帳號。
 
+## 下載（Android）
+- 最新版：[Releases](https://github.com/yaufan/APP_Kids_Paint_for_learning_writing/releases/latest)，一般手機下載 `letter-pets-版本-arm64.apk`。
+- 用手機掃描 [docs/download-qr.png](docs/download-qr.png)。
+
 ## 目前進度
-- 0.1 開發中：開場故事、選蛋、孵蛋取名字、寵物的家（照顧和互動）、寫字的四個關卡（看、點、描、寫）、數字 0～9 和大寫 A～Z、特殊糧食和今日大餐、背景音樂和音效、家長模式。
+- 0.1.0（測試版，2026-11-04）：開場故事、選蛋、孵蛋取名字、寵物的家（照顧和互動）、寫字的四個關卡（看、點、描、寫）、數字 0～9 和大寫 A～Z、特殊糧食和今日大餐、背景音樂和音效、家長模式。
 - 版本紀錄：[CHANGELOG.md](CHANGELOG.md)。
 
 ## 程式
