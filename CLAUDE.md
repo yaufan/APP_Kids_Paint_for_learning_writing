@@ -22,8 +22,13 @@
 - 名稱：字母寵物。
 
 ## GitHub Actions
-- 現在還沒有工作流程。
-- 之後照畫畫小鎮的做法加：自動測試、打包 APK、發布；只在 `main` 自動執行；固定的測試簽章金鑰放在這個專案自己的 Secrets，指紋寫在工作流程裡。
+- 工作流程（照畫畫小鎮）：
+  - `app.yml`（App）：推到 `main` 而且改到 `app/**` 時跑分析、全部測試（含完整流程）、打包 APK，約 15～20 分鐘。
+  - `release.yml`（Release）：推到 `main` 而且改到 `app/pubspec.yaml`、`CHANGELOG.md` 或它自己時，版本還沒發布過就打包三個 APK 放上 Releases，約 20 分鐘；版本沒變約 1 分鐘。
+  - `cleanup.yml`：手動，刪舊的建置檔案，約 1 分鐘。
+- 推工作分支（`claude/...`）不會啟動任何工作流程。
+- 簽章：和畫畫小鎮用**同一把測試金鑰**（別名 `kidspaint`），Secrets 名稱一樣：`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`，要放在這個專案的 Actions → Secrets → Repository secrets。指紋 `TEST_KEY_SHA256` 寫在工作流程裡。以後上架要換成正式的上傳金鑰。
+- 發新版本：`app/pubspec.yaml` 的 `version`、`app/lib/app/version.dart` 的預設值、`CHANGELOG.md` 最上面一段（`## 版本 …`）三個要一致（`test/version_test.dart` 檢查）。
 - **任何會啟動 Actions 的動作，都要先問使用者，等使用者同意才做**，問的時候說清楚四件事：
   1. 會跑哪些工作流程。
   2. 這次大約用掉幾分鐘。
