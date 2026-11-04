@@ -3,7 +3,7 @@
 給 3 歲以上小朋友的 APP：照著筆順學寫 0～9、大寫 A～Z、小寫 a～z。寫對了，寵物得到特殊糧食，長得比較快；寵物越大，越會陪小朋友。家長可以看進度、自己設定獎勵。
 
 - 設計：[docs/design.md](docs/design.md)
-- 和「[畫畫小鎮](https://github.com/yaufan/APP_Kids_Paint)」是兄弟 APP：同一個作者、同一套技術和畫風。
+- 和「[畫畫小鎮](https://github.com/yaufan/APP_Kids_Paint)」是兄弟 APP：同一個作者、同一套技術；畫風不同，是繪本故事風格。
 - 不連網、不定位、沒有廣告、不賣東西、沒有帳號。
 
 ## 目前進度
