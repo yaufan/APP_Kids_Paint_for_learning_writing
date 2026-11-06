@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/providers.dart';
+import '../features/book/book_screen.dart';
+import '../features/find/find_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/letters/letters_screen.dart';
 import '../features/parent/parent_screen.dart';
@@ -28,6 +30,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/letters', builder: (_, _) => const LettersScreen()),
       GoRoute(path: '/write/:id', builder: (_, s) => WriteScreen(id: s.pathParameters['id']!)),
       GoRoute(path: '/parent', builder: (_, _) => const ParentScreen()),
+      GoRoute(path: '/book', builder: (_, _) => const BookScreen()),
+      GoRoute(path: '/find', builder: (_, _) => const FindScreen()),
     ],
   );
   ref.onDispose(router.dispose);

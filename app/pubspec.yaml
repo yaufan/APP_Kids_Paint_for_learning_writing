@@ -65,6 +65,8 @@ flutter:
     - assets/art/items/
     - assets/art/story/
     - assets/art/wear/
+    - assets/art/words/
+    - assets/art/rewards/
     - assets/sounds/
   fonts:
     - family: Huninn

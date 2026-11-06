@@ -18,6 +18,8 @@ import '../pet/pet_view.dart';
 import 'hatch.dart';
 import 'meters.dart';
 import 'particles.dart';
+import 'reward_overlay.dart';
+import 'side_cards.dart';
 
 /// Things the child carries to the pet with a finger (or taps, and the
 /// thing goes by itself).
@@ -94,9 +96,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     _ticker = createTicker(_tick)..start();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      // Today's tasks are picked the first time the home opens each day.
+      final order = [for (final x in ref.read(glyphBookProvider).all) x.id];
+      _game.change((g, now) => g.withTasks(now, order));
       final g = ref.read(gameProvider);
       if (!g.hatched) _speak(Strings.eggHint, 4);
-      if (g.feastReady(_now)) _speak(Strings.feastReady, 3.5);
+      if (g.feastReady(_now)) {
+        _speak(Strings.feastReady, 3.5);
+      } else if (g.today(_now).tasksBonus && g.cookies.contains(Game.bonusCookie)) {
+        _speak(Strings.tasksDone, 3.5);
+      }
     });
   }
 
@@ -584,6 +593,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 if (g.hatched) GrowthBar(value: g.toNextStage),
               ]),
             ),
+            // Left: today's tasks, the gift box, the sticker book and finding letters.
+            if (g.hatched && g.name != null && !_sleeping)
+              Positioned(
+                left: 12,
+                top: pad.top + 64,
+                width: 84,
+                child: Column(children: [
+                  if (g.tasks.isNotEmpty)
+                    TaskCard(
+                      tasks: [for (final id in g.tasks) ?ref.read(glyphBookProvider).byId[id]],
+                      done: g.tasksDone(now),
+                      onTap: (x) => context.push('/write/${Uri.encodeComponent(x.id)}'),
+                    ),
+                  if (g.currentReward case final r?) ...[
+                    const SizedBox(height: 10),
+                    GiftCard(reward: r, progress: g.progress(r)),
+                  ],
+                  const SizedBox(height: 10),
+                  SmallArtButton(label: Strings.book, art: 'items/book', onTap: () => context.push('/book')),
+                  const SizedBox(height: 8),
+                  SmallArtButton(label: Strings.find, art: 'items/magnifier', onTap: () => context.push('/find')),
+                ]),
+              ),
             // Right: write, the stars, the cookies.
             Positioned(
               left: rightX,
@@ -692,6 +724,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               ),
             if (g.hatched && g.name == null) Positioned.fill(child: HatchOverlay(species: species)),
             if (g.grewUp && g.name != null) Positioned.fill(child: GrowUpOverlay(name: g.name!, stage: g.stage, art: art)),
+            if (!g.grewUp && g.name != null && g.rewardToShow != null)
+              Positioned.fill(child: RewardOverlay(reward: g.rewardToShow!, art: art)),
           ]),
         );
       }),

@@ -1,3 +1,4 @@
+import '../core/game.dart';
 import '../core/glyphs.dart';
 import '../core/pets.dart';
 import '../core/writing.dart';
@@ -111,6 +112,31 @@ abstract final class Strings {
         GlyphKind.capital => '${g.show}, ${g.en}',
       };
 
+  // Today's tasks, the sticker book, finding letters (0.2).
+  static const tasks = '今天的任務';
+  static String task(Glyph g) => '任務：${glyphLabel(g)}';
+  static const tasksDone = '今天的任務完成了！送你一塊星星餅乾';
+  static const book = '字母圖鑑';
+  static const bookHint = '寫對一個字，就得到一張圖卡';
+  static String cardOf(Glyph g) => '${glyphLabel(g)} 圖卡';
+  static String locked(Glyph g) => '寫對 ${glyphLabel(g)}，就會得到這張圖卡喔';
+  static const shiny = '3 顆星：閃亮亮的圖卡';
+  static const find = '找字母';
+  static const findTitle = '幫寶貝找字母';
+  static const findAsk = '幫我找到';
+  static String findAskShown(Glyph g) => '找到 ${g.show}';
+  static const findRight = '找到了！';
+  static String thisIs(Glyph g) => '這是 ${g.show} 喔';
+  static const allFound = '全部找到了！你好厲害';
+  static const playAgain = '再玩一次';
+
+  // Rewards (0.2): the gift box and the special screen.
+  static const gift = '禮物';
+  static String giftProgress(int n, int target) => '$n／$target';
+  static const reached = '達成了！';
+  static String parentsSay(String text) => '爸爸媽媽說：$text';
+  static const showParents = '拿給爸爸媽媽看';
+
   // Parent gate (as in 畫畫小鎮).
   static const callParent = '請爸爸媽媽來幫忙喔！';
   static const parentGateTitle = '家長確認';
@@ -144,6 +170,44 @@ abstract final class Strings {
   static const music = '背景音樂';
   static const effects = '音效';
   static const voice = '語音（念字母和說明）';
+  static const dailyTasks = '每天的任務';
+  static String tasksCount(int n) => '寵物每天出 $n 個字：1 個新的，其他複習';
+  static const thisWeek = '這 7 天';
+  static String weekLine(int right, int days) => '寫對 $right 個字，練習了 $days 天';
+  static String daysPracticed(int n) => '有練習的天數：$n 天';
+  static const eachLetter = '每個字';
+  static const oftenWrong = '常寫錯的字';
+  static const noneWrong = '還沒有';
+  static const rewards = '獎勵';
+  static const rewardsNote = '自己設定獎勵，一個達成、你按「已經兌現」後，換下一個。小朋友在寵物的家看得到禮物盒和進度。';
+  static const addReward = '新增獎勵';
+  static const rewardGoal = '目標';
+  static String goalName(RewardGoal g) => switch (g) {
+        RewardGoal.right => '寫對幾個字',
+        RewardGoal.learned => '學會幾個字（拿到 3 顆星）',
+        RewardGoal.days => '有練習的天數',
+      };
+  static String goalShort(RewardGoal g, int n) => switch (g) {
+        RewardGoal.right => '寫對 $n 個字',
+        RewardGoal.learned => '學會 $n 個字',
+        RewardGoal.days => '練習 $n 天',
+      };
+  static const rewardCount = '數量';
+  static const rewardText = '獎勵是什麼（例如：週末去公園）';
+  static const rewardIcon = '圖示';
+  static String rewardIconName(String id) => const {
+        'ice_cream': '冰淇淋',
+        'park': '公園',
+        'toy': '玩具',
+        'book': '故事書',
+        'hug': '擁抱',
+        'star': '其他',
+      }[id]!;
+  static String rewardState(Reward r, int progress) => r.redeemedAt != null
+      ? '已經兌現'
+      : (r.reachedAt != null ? '達成了，等你兌現' : (r.from == null ? '排隊中' : '進行中 $progress／${r.target}'));
+  static const redeem = '已經兌現';
+  static const remove = '刪掉';
   static const edition = '版本';
   static const full = '完整版';
   static const fullNote = '免費：數字 0～9、大寫 A～Z、1 隻寵物。完整版（一次買斷）：小寫、寫自己的名字、全部 7 隻寵物、換裝、新的地方、印學習單。測試版先全部打開。';

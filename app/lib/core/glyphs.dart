@@ -27,6 +27,10 @@ class Glyph {
 
   static const height = 100.0;
 
+  /// Its picture in the sticker book (a capital's word; digits are drawn
+  /// as that many stars).
+  String? get picture => kind == GlyphKind.capital ? 'words/${en.replaceAll(' ', '_').replaceAll('-', '_')}' : null;
+
   Size get size => Size(width, height);
 
   factory Glyph.fromJson(Map<String, dynamic> j) => Glyph(
