@@ -17,8 +17,9 @@
 | `pets.py` | 7 隻寵物（含開心、睡覺的眼睛）、`pets.json`、蛋（整顆和裂成兩半）、`eggs.json`、照顧用的小圖、寶寶圍兜和帽子 | `pets/`、`eggs/`、`items/`、`wear/` |
 | `homes.py` | 7 個寵物的家（背景，1080×1920） | `homes/` |
 | `story.py` | 開場故事 3 張（1080×1080） | `story/` |
+| `words.py` | 貼紙簿的 26 張單字圖（A apple～Z zebra）、家長設定的 6 個獎勵圖示、積木、放大鏡、貼紙簿、今天的任務 | `words/`、`rewards/`、`items/` |
 | `icon.py` | APP 圖示：小狗抱著寫著 A 的木頭積木 | Android、iOS 的圖示資料夾 |
-| `preview.py` | 全部的圖排在一張大圖上，順便檢查寵物有沒有站在圖的最下緣 | 你指定的 PNG |
+| `preview.py` | 全部的圖排在一張大圖上（單字圖和獎勵圖還會用手機上的大小 90 像素再排一次），順便檢查寵物有沒有站在圖的最下緣 | 你指定的 PNG |
 
 ## 怎麼跑
 在這個資料夾裡：
@@ -26,11 +27,12 @@
 python3 pets.py                    # 寵物、蛋、小圖、圍兜和帽子
 python3 homes.py                   # 寵物的家
 python3 story.py                   # 開場故事
+python3 words.py                   # 單字圖、獎勵圖、積木、放大鏡、貼紙簿、任務卡
 python3 icon.py preview 圖示.png    # 圖示預覽：圓形、圓角方形、方形，48／96／192 像素
 python3 icon.py export             # 寫進 Android 和 iOS
 python3 preview.py 預覽.png         # 全部的圖排成一張，看看對不對
 ```
-`pets.py`、`homes.py`、`story.py` 只要 Python 3。`icon.py` 和 `preview.py` 還要 Pillow、Node.js 和 Playwright（用 Chromium 把 SVG 畫成 PNG，借用畫畫小鎮的 `docs/design/v6/render_alpha.js`；沒有那個資料夾時，把它複製一份到這裡）。
+`pets.py`、`homes.py`、`story.py`、`words.py` 只要 Python 3。`icon.py` 和 `preview.py` 還要 Pillow、Node.js 和 Playwright（用 Chromium 把 SVG 畫成 PNG，借用畫畫小鎮的 `docs/design/v6/render_alpha.js`；沒有那個資料夾時，把它複製一份到這裡）。
 
 ## 給 APP 用的說明
 ### 寵物 `pets/`
@@ -63,6 +65,20 @@ python3 preview.py 預覽.png         # 全部的圖排成一張，看看對不�
 ### 小圖 `items/`、穿戴 `wear/`
 都是 120×120：bowl、cookie（中間空著，APP 自己寫字母）、sponge、shower、ball、bubbleBall、moon、star、heart、giftClosed、giftOpen、brush、blanket、zzz、feast_closed、feast_open、sun。
 `wear/bib.svg`、`wear/cap.svg`；`wear/wear.json` 寫著對齊點：圍兜的脖子在 (60, 24)，放在 `mouth` 下面一點；帽子的帽緣在 (60, 90)，放在頭頂（`head.cy - head.r × 0.8` 附近）。
+
+另外四張（`words.py` 畫的，一樣 120×120）：
+- `block.svg`：木頭積木，前面是空的，APP 自己印字母。前面那一面是 (21, 25) 起、78×78，中心在 (60, 64)（`words.py` 的 `BLOCK_FACE`）。
+- `magnifier.svg`：放大鏡（找字母的按鈕）。
+- `book.svg`：合起來的繪本，封面有一顆星星（貼紙簿的按鈕）。
+- `task.svg`：夾板上的小清單，打了兩個勾（今天的任務；APP 用 30 像素也看得懂）。
+
+### 單字圖 `words/`
+貼紙簿裡每學會一個大寫字母，就貼上它的單字圖。240×240，背景透明，東西放在正中間、四周留 12 單位。檔名就是英文單字（空格和 `-` 換成 `_`），和 `glyphs.json` 的 `en` 對得上：
+apple、ball（海灘球）、cat（灰色小貓，和橘色的寵物小貓不一樣）、dog（白色小狗，咖啡色耳朵和紅項圈）、egg（鳥窩裡一顆蛋）、fish、grapes、hat（草帽）、ice_cream（兩球加櫻桃）、juice（一杯柳橙汁）、kite、lion、moon、nose（小熊的臉，大大的鼻子是重點）、orange（一顆加一片）、pig、queen（戴皇冠的小皇后，不是真的人）、rabbit（咖啡色兔子抱紅蘿蔔，和白色的寵物小兔不一樣）、sun、tree、umbrella、violin、watermelon、xylophone、yo_yo、zebra。
+動物和寵物一樣：圓圓的頭、亮亮的黑點眼睛、紅紅的臉頰。
+
+### 獎勵圖 `rewards/`
+家長設定獎勵時選的圖示，240×240，和單字圖一樣的格式：ice_cream（一球的甜筒）、park（樹和盪鞦韆）、toy（上發條的玩具車）、book（打開的故事書）、hug（兩顆愛心抱在一起）、star（大星星，「其他」用）。
 
 ### 開場故事 `story/`
 1. 字母森林的邊上，黃昏，一間有圓門和暖暖窗戶的小屋（樹間飄著幾個發光的小字母，像螢火蟲；不要的話把 `story.py` 的 `LETTER_FIREFLIES` 改成 False）。

@@ -185,10 +185,37 @@ void main() {
       expect(app.game.grewUp, isFalse);
       await shot('18_toddler');
 
+      // Today's tasks are on the home: the first one ticked after writing it.
+      expect(app.game.tasks, isNotEmpty);
+      expect(find.bySemanticsLabel(Strings.task(glyphBook.byId[app.game.tasks.first]!)), findsOneWidget);
+
+      // The sticker book: the 1 card is there, the rest still to find.
+      await app.tapLabel(Strings.book, ms: 900);
+      expect(find.bySemanticsLabel(Strings.cardOf(glyphBook.byId['1']!)), findsOneWidget);
+      await shot('19_book');
+      await app.tapLabel(Strings.cardOf(glyphBook.byId['1']!), ms: 600);
+      expect(app.voice.said.last, '一|1');
+      await shot('20_card');
+      await tester.tapAt(const Offset(20, 300));
+      await app.settle(300);
+      await app.tapLabel(Strings.home, ms: 700);
+
+      // Finding letters: the asked one, among others.
+      await app.tapLabel(Strings.find, ms: 900);
+      final asked = app.voice.said.last;
+      await shot('21_find');
+      final blocks = [for (final g in glyphBook.all) if (find.bySemanticsLabel(g.show).evaluate().isNotEmpty && g.show.isNotEmpty) g];
+      final target = blocks.firstWhere((g) => asked == '${Strings.findAsk}${g.zh}' || asked == '${Strings.findAsk}|${g.show}');
+      await tester.tap(find.bySemanticsLabel(target.show).first);
+      await app.settle(300);
+      expect(app.sounds.played.last, Sfx.star);
+      await app.settle(1600);
+      await app.tapLabel(Strings.home, ms: 700);
+
       // Parent mode, behind the gate.
       await app.tapLabel(Strings.parent, ms: 600);
       expect(find.text(Strings.parentGateTitle), findsOneWidget);
-      await shot('19_gate');
+      await shot('22_gate');
       final question = tester.widget<Text>(find.textContaining('等於多少')).data!;
       const zh = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
       final parts = RegExp(r'(\S) 加 (\S)').firstMatch(question)!;
@@ -199,13 +226,51 @@ void main() {
       }
       await app.settle(800);
       expect(find.text(Strings.parentTitle), findsOneWidget);
-      await shot('20_parent');
+      await shot('23_parent');
+
+      // A reward: write 3 characters right, go to the park.
+      await tester.dragUntilVisible(find.byKey(const ValueKey('add-reward')), find.byType(ListView), const Offset(0, -200));
+      await app.settle(300);
+      await tester.tap(find.byKey(const ValueKey('add-reward')));
+      await app.settle(500);
+      for (var i = 0; i < 6; i++) {
+        await tester.tap(find.byKey(const ValueKey('target-less')));
+      }
+      await app.settle(200);
+      await tester.enterText(find.byKey(const ValueKey('reward-text')), '週末去公園');
+      await tester.tap(find.byKey(const ValueKey('icon-park')));
+      await app.settle(300);
+      await shot('24_new_reward');
+      await tester.tap(find.byKey(const ValueKey('save-reward')));
+      await app.settle(500);
+      final reward = app.game.currentReward!;
+      expect(reward.text, '週末去公園');
+      await tester.ensureVisible(find.byKey(const ValueKey('strictness-strict')));
+      await app.settle(300);
       await tester.tap(find.byKey(const ValueKey('strictness-strict')));
       await app.settle(300);
       expect(app.game.settings.strictness.name, 'strict');
       await tester.dragUntilVisible(find.byKey(const ValueKey('full')), find.byType(ListView), const Offset(0, -200));
       await app.settle(300);
-      await shot('21_parent_more');
+      await shot('25_parent_more');
+
+      // Reached: the gift box opens on the parent's words.
+      await tester.tap(find.byTooltip(Strings.back));
+      await app.settle(600);
+      app.change((g) {
+        var x = g;
+        for (var i = 0; i < reward.target; i++) {
+          x = x.wrote('7', 3, app.now);
+        }
+        return x;
+      });
+      await app.settle(900);
+      expect(find.text(Strings.reached), findsOneWidget);
+      expect(app.voice.said.last, '${Strings.reached}${Strings.parentsSay('週末去公園')}');
+      await shot('26_reward');
+      await app.tapLabel(Strings.showParents, ms: 600);
+      expect(app.game.rewardToShow, isNull);
+      await shot('27_home_after');
 
       await app.end();
     }, timeout: const Timeout(Duration(minutes: 6)));

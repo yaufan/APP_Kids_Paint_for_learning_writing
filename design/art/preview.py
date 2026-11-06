@@ -4,8 +4,9 @@
 
 The sheet: the pets with their three eyes (and pets.json's points drawn
 over them), the eggs whole and cracked, the homes with their pet standing
-at y = 1450 (30% of the width), the items and wear, the story pages and
-the app icon. It also prints, for each pet, the space left round it in its
+at y = 1450 (30% of the width), the items and wear, the word pictures and
+rewards (big, and again at phone size: 90 px), the story pages and the
+app icon. It also prints, for each pet, the space left round it in its
 picture (the bottom should be 0: the pet stands on the bottom edge).
 Needs Node.js with Playwright (Chromium draws the SVGs) and Pillow.
 """
@@ -27,7 +28,11 @@ if not RENDER.exists():
 
 PETS = ["puppy", "kitten", "bunny", "dino", "dolphin", "octopus", "turtle"]
 ITEMS = ["bowl", "cookie", "sponge", "shower", "ball", "bubbleBall", "moon", "star", "heart", "giftClosed", "giftOpen",
-         "brush", "blanket", "zzz", "feast_closed", "feast_open", "sun"]
+         "brush", "blanket", "zzz", "feast_closed", "feast_open", "sun", "block", "magnifier", "book", "task"]
+WORDS = ["apple", "ball", "cat", "dog", "egg", "fish", "grapes", "hat", "ice_cream", "juice", "kite", "lion", "moon",
+         "nose", "orange", "pig", "queen", "rabbit", "sun", "tree", "umbrella", "violin", "watermelon", "xylophone",
+         "yo_yo", "zebra"]
+REWARDS = ["ice_cream", "park", "toy", "book", "hug", "star"]
 WEAR = ["bib", "cap"]
 SHEET_W = 2200
 BG = "#F3EEE6"
@@ -135,6 +140,28 @@ def items_section(sh):
     sh.y += ((len(names) + per_row - 1) // per_row) * (cell + 10) + 20
 
 
+def words_section(sh):
+    """The word pictures and rewards (240 x 240) on white cards, then all of
+    them again at 90 px, about as small as a phone shows them."""
+    sh.title("Word pictures (A to Z) and rewards (240 x 240), then at phone size (90 px)")
+    names = [("words", w) for w in WORDS] + [("rewards", r) for r in REWARDS]
+    per_row, cell = 11, 196
+    for i, (folder, name) in enumerate(names):
+        x = 24 + (i % per_row) * cell
+        y = sh.y + (i // per_row) * (cell + 16)
+        sh.raw(f'<div style="position:absolute;left:{x}px;top:{y}px;width:{cell - 16}px;height:{cell - 16}px;background:#FFFFFF;border-radius:18px"></div>')
+        sh.img(ART / folder / f"{name}.svg", x + 15, y + 6, 150, 150)
+        sh.text(("reward: " if folder == "rewards" else "") + name, x + 10, y + 158, 16, False)
+    sh.y += ((len(names) + per_row - 1) // per_row) * (cell + 16) + 10
+    per_row, cell = 20, 106
+    for i, (folder, name) in enumerate(names):
+        x = 24 + (i % per_row) * cell
+        y = sh.y + (i // per_row) * (cell + 4)
+        sh.raw(f'<div style="position:absolute;left:{x}px;top:{y}px;width:{cell - 8}px;height:{cell - 8}px;background:#FFFDF8;border-radius:12px"></div>')
+        sh.img(ART / folder / f"{name}.svg", x + 4, y + 4, 90, 90)
+    sh.y += ((len(names) + per_row - 1) // per_row) * (cell + 4) + 30
+
+
 def story_section(sh):
     sh.title("Opening story (1080 x 1080) and the app icon")
     s = 480
@@ -174,6 +201,7 @@ def main():
     eggs_section(sh)
     homes_section(sh)
     items_section(sh)
+    words_section(sh)
     story_section(sh)
     html = (f'<html><body style="margin:0;background:{BG};width:{SHEET_W}px;height:{sh.y}px;position:relative">'
             + "".join(sh.parts) + "</body></html>")

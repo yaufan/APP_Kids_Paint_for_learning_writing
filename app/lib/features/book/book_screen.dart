@@ -149,7 +149,8 @@ class StickerCard extends StatelessWidget {
               ),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text(glyph.show, style: TextStyle(fontSize: size * 0.2, fontWeight: FontWeight.w700, color: got ? Book.coralLine : Book.paperGrain)),
-                if (got) ...[
+                // A digit's Chinese numeral looks like a dash next to it: only words.
+                if (got && glyph.kind == GlyphKind.capital) ...[
                   SizedBox(width: size * 0.05),
                   Flexible(child: Text(word, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: size * 0.13, fontWeight: FontWeight.w700, color: Book.ink))),
                 ],
