@@ -466,10 +466,8 @@ void main() {
       await tap(find.byKey(ValueKey('gate-key-$d')));
     }
     await until(find.text(Strings.parentTitle));
-    caption.value = '看今天寫對幾個字；設定寬鬆程度、左撇子、每天的目標';
-    await seconds(3);
-    await tap(find.byKey(const ValueKey('strictness-normal')));
-    await seconds(1.5);
+    caption.value = '看這 7 天寫對幾個字、每個字的星星、常寫錯的字';
+    await seconds(3.5);
     mark('reward');
     caption.value = '家長自己設定獎勵：例如寫對 3 個字，週末去公園';
     await tester.dragUntilVisible(find.byKey(const ValueKey('add-reward')), find.byType(ListView), const Offset(0, -200));
