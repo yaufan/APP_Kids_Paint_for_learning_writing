@@ -8,6 +8,7 @@ import '../features/book/book_screen.dart';
 import '../features/find/find_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/letters/letters_screen.dart';
+import '../features/parent/parent_gate.dart';
 import '../features/parent/parent_screen.dart';
 import '../features/story/story_screen.dart';
 import '../features/write/write_screen.dart';
@@ -17,7 +18,10 @@ import 'theme.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/home',
+    // Always start here, whatever page another app asks the phone to open.
+    overridePlatformDefaultLocation: true,
     redirect: (context, state) {
+      if (state.matchedLocation == '/parent' && !ParentPass.take()) return '/home';
       final g = ref.read(gameProvider);
       final atStory = state.matchedLocation == '/story';
       if (g.species == null && !atStory) return '/story';
