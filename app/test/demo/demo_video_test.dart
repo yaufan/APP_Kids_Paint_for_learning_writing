@@ -363,17 +363,24 @@ void main() {
     await label('A');
     await seconds(4);
     await label(Strings.stepWrite);
-    caption.value = '寫反了也不打叉：溫和地再示範一次那一筆';
-    await seconds(1);
+    caption.value = '第 4 關「寫」：一筆一筆寫\n下面有淡淡的字，寫對越多次越淡';
+    await seconds(2);
     final a = glyphBook.byId['A']!;
     final atA = pageOf(a);
+    caption.value = '寫反了：只有這一筆慢慢消失\n寵物示範一次，再寫這一筆';
     await stroke([for (final p in a.strokes.first.reversed) atA(p)], every: 3);
+    await seconds(3.5);
+    caption.value = '寫對了就變彩色，下一個綠點才出現';
+    await stroke([for (final p in a.strokes[0]) atA(p)], every: 3);
+    await seconds(1.5);
+    caption.value = '不小心點到、小點點都不算';
+    await touch(atA(const Offset(70, 20)));
+    await seconds(1.5);
+    caption.value = '寫完最後兩筆';
     for (final st in a.strokes.skip(1)) {
       await stroke([for (final p in st) atA(p)], every: 3);
+      await frames(3);
     }
-    await seconds(3.5);
-    caption.value = '再寫一次：從綠點開始';
-    await write(a);
     await seconds(1);
     caption.value = '寫對了！3 顆星星換一塊「A 字母餅乾」';
     await seconds(3);
@@ -409,7 +416,43 @@ void main() {
     change((g) => g.copyWith(species: Species.puppy, name: '豆豆'));
     await seconds(1);
 
-    // 10. Parent mode.
+    // 10. Today's tasks, the sticker book, finding letters.
+    mark('tasks');
+    caption.value = '每天的任務（左上）：寵物出 3 個字\n1 個新的、2 個複習，全部寫完送星星餅乾';
+    await seconds(4);
+    mark('book');
+    caption.value = '字母圖鑑：寫對一個字就得到一張圖卡\n3 顆星變閃亮亮';
+    await label(Strings.book);
+    await seconds(2.5);
+    await label(Strings.cardOf(glyphBook.byId['1']!));
+    await seconds(2);
+    await touch(const Offset(40, 160));
+    await tester.dragUntilVisible(find.bySemanticsLabel(Strings.cardOf(a)), find.byType(ListView), const Offset(0, -300));
+    await seconds(1);
+    await label(Strings.cardOf(a));
+    caption.value = 'A 的圖卡：蘋果 apple（會念出來）';
+    await seconds(2.5);
+    await touch(const Offset(40, 160));
+    await label(Strings.home);
+    await seconds(1);
+    mark('find');
+    caption.value = '找字母：寵物把字母積木藏起來\n「幫我找到 A」，找錯了只會說「這是 B 喔」';
+    await label(Strings.find);
+    await seconds(2);
+    for (var round = 0; round < 3; round++) {
+      final asked = tester.widget<Text>(find.textContaining('找到 ').first).data!.replaceFirst('找到 ', '');
+      final wrong = [for (final g in glyphBook.all) if (g.show.isNotEmpty && g.show != asked && find.bySemanticsLabel(g.show).evaluate().isNotEmpty) g];
+      if (round == 0 && wrong.isNotEmpty) {
+        await tap(find.bySemanticsLabel(wrong.first.show));
+        await seconds(1.2);
+      }
+      await tap(find.bySemanticsLabel(asked));
+      await seconds(1.8);
+    }
+    await label(Strings.home);
+    await seconds(1);
+
+    // 11. Parent mode.
     mark('parent');
     caption.value = '家長模式：左上角的鎖，要先答對一題加法';
     await label(Strings.parent);
@@ -427,9 +470,40 @@ void main() {
     await seconds(3);
     await tap(find.byKey(const ValueKey('strictness-normal')));
     await seconds(1.5);
-    caption.value = '音樂、音效、語音的開關；完整版（以後在這裡購買）';
-    await stroke(line(const Offset(200, 700), const Offset(200, 250), 12));
-    await seconds(3);
+    mark('reward');
+    caption.value = '家長自己設定獎勵：例如寫對 3 個字，週末去公園';
+    await tester.dragUntilVisible(find.byKey(const ValueKey('add-reward')), find.byType(ListView), const Offset(0, -200));
+    await seconds(1);
+    await tap(find.byKey(const ValueKey('add-reward')));
+    await seconds(1);
+    for (var i = 0; i < 11; i++) {
+      await tester.tap(find.byKey(const ValueKey('target-less')));
+      await tester.pump();
+    }
+    await tester.enterText(find.byKey(const ValueKey('reward-text')), '週末去公園');
+    await seconds(1);
+    await tap(find.byKey(const ValueKey('icon-park')));
+    await seconds(1.5);
+    await tap(find.byKey(const ValueKey('save-reward')));
+    await seconds(1.5);
+    caption.value = '進度、常寫錯的字、每天的任務數量、音樂和語音的開關';
+    await stroke(line(const Offset(200, 700), const Offset(200, 200), 12));
+    await seconds(2.5);
+    await tap(find.byTooltip(Strings.back));
+    await seconds(1);
+    caption.value = '小朋友在家裡看得到禮物盒和進度';
+    await seconds(2.5);
+    change((g) {
+      var x = g;
+      for (var i = 0; i < 3; i++) {
+        x = x.wrote('7', 3, now);
+      }
+      return x;
+    });
+    caption.value = '達成了！禮物盒打開\n念出「爸爸媽媽說：週末去公園」';
+    await seconds(5);
+    await label(Strings.showParents);
+    await seconds(1);
     caption.value = '';
     mark('end');
     await seconds(0.5);
