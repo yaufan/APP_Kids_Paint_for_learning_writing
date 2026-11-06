@@ -201,6 +201,34 @@ Verdict _judge(List<List<Offset>> strokes, List<List<Offset>> template, Strictne
   return Verdict(stars, checks);
 }
 
+/// Stars for strokes written right with these average distances: neat is
+/// three; a letter with many tries keeps at most two.
+int starsFor(Iterable<double> errors, Strictness strictness, {int misses = 0}) {
+  if (errors.isEmpty) return 0;
+  final worst = errors.reduce(math.max);
+  final stars = worst <= strictness.path * 0.45 ? 3 : (worst <= strictness.path * 0.7 ? 2 : 1);
+  return misses >= 3 ? math.min(stars, 2) : stars;
+}
+
+/// A touch too short to be a stroke of [template]: a tap, a dot, a palm.
+bool isTap(List<Offset> drawn, List<Offset> template) => drawn.length < 3 || pathLength(drawn) < math.max(6, pathLength(template) * 0.18);
+
+/// One stroke written on its own (step 4, a stroke at a time): which of
+/// the [open] template strokes it is, or null when it is none of them yet.
+/// In order (normal, strict) only the first open one counts; lenient takes
+/// whichever fits.
+({int index, StrokeCheck check})? matchStroke(List<Offset> drawn, List<List<Offset>> template, List<int> open, Strictness strictness) {
+  if (open.isEmpty) return null;
+  final candidates = strictness == Strictness.lenient ? open : [open.first];
+  ({int index, StrokeCheck check})? best;
+  for (final i in candidates) {
+    final c = checkStroke(drawn, template[i], strictness);
+    if (!c.ok(strictness)) continue;
+    if (best == null || _score(c) < _score(best.check)) best = (index: i, check: c);
+  }
+  return best;
+}
+
 double _score(StrokeCheck c) => c.error + (c.startOk ? 0 : 40) + (c.directionOk ? 0 : 40) + (1 - c.covered) * 30;
 
 /// Tracing one stroke along its road (the third step): how far along the

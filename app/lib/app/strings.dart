@@ -93,6 +93,9 @@ abstract final class Strings {
   static const eggMoved = '蛋在動了！回家看看';
   static const cheers = ['加油！', '你好厲害！', '慢慢來喔', '我陪你寫'];
   static const startAtStar = '從星星開始喔';
+  static const followArrow = '方向反了喔，跟著箭頭寫';
+  static const oneMore = '差一點點，再寫一次這一筆';
+  static const alongRoad = '沿著小路寫寫看';
 
   /// What is read out in Mandarin when a character is shown ("A，蘋果").
   static String sayZh(Glyph g) => switch (g.kind) {

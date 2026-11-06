@@ -93,7 +93,13 @@ class WritePainter extends CustomPainter {
     this.tapped = 0,
     this.tracers = const [],
     this.current = 0,
-    this.ink = const [],
+    this.done = const {},
+    this.live,
+    this.fading,
+    this.fade = 0,
+    this.guide = 0,
+    this.road = false,
+    this.arrow = true,
     this.hint,
     this.hintProgress = 0,
     this.leftHanded = false,
@@ -116,7 +122,22 @@ class WritePainter extends CustomPainter {
 
   /// The stroke being traced or written.
   final int current;
-  final List<List<Offset>> ink;
+  /// Step 4: the strokes written right so far (by template stroke), the one
+  /// being written, and a wrong one fading away ([fade] 0..1, gone at 1).
+  final Map<int, List<Offset>> done;
+  final List<Offset>? live;
+  final List<Offset>? fading;
+  final double fade;
+
+  /// How much help to show under the writing: 0 the faint letter, 1 a
+  /// dotted line, 2 nothing but the green dot.
+  final int guide;
+
+  /// After three tries at a stroke, its road shows again.
+  final bool road;
+
+  /// The little arrow beside the green dot.
+  final bool arrow;
   final int? hint;
   final double hintProgress;
   final bool leftHanded;
@@ -179,22 +200,51 @@ class WritePainter extends CustomPainter {
           _dot(canvas, fit.toScreen(at), fit.scale);
         }
       case Step.write:
-        if (current < strokes.length && hint == null) _dot(canvas, fit.toScreen(strokes[current].first), fit.scale);
-        for (final s in ink) {
+        // The help under the writing.
+        for (final st in strokes) {
+          final path = strokePath(st, fit.toScreen);
+          if (guide == 0) canvas.drawPath(path, line(Book.road.withValues(alpha: 0.75), roadWidth * 0.85));
+          if (guide == 1) _dotted(canvas, st, fit);
+        }
+        if (road && current < strokes.length) {
+          final path = strokePath(strokes[current], fit.toScreen);
+          canvas.drawPath(path, line(Book.roadLine, roadWidth + 2));
+          canvas.drawPath(path, line(Book.road, roadWidth));
+        }
+        void ink(List<Offset> s, Color c) {
           if (s.length == 1) {
-            canvas.drawCircle(fit.toScreen(s.first), inkWidth * fit.scale / 2, Paint()..color = inkColor);
+            canvas.drawCircle(fit.toScreen(s.first), inkWidth * fit.scale / 2, Paint()..color = c);
           } else {
-            canvas.drawPath(strokePath(s, fit.toScreen), line(inkColor, inkWidth));
+            canvas.drawPath(strokePath(s, fit.toScreen), line(c, inkWidth));
           }
         }
+        for (final s in done.values) {
+          ink(s, inkColor);
+        }
+        final f = fading;
+        if (f != null && fade < 1) ink(f, inkColor.withValues(alpha: 0.6 * (1 - fade)));
         final h = hint;
         if (h != null && h < strokes.length) {
           canvas.drawPath(strokePath(strokes[h], fit.toScreen), line(Book.go.withValues(alpha: 0.35), roadWidth));
           final part = partOf(strokes[h], hintProgress);
           canvas.drawPath(strokePath(part, fit.toScreen), line(Book.goLine, inkWidth * 0.8));
-          _dot(canvas, fit.toScreen(strokes[h].first), fit.scale);
-          _arrow(canvas, fit, strokes[h], 0);
         }
+        if (current < strokes.length) {
+          if (arrow || h != null) _arrow(canvas, fit, strokes[current], 0);
+          _dot(canvas, fit.toScreen(strokes[current].first), fit.scale);
+        }
+        final l = live;
+        if (l != null) ink(l, inkColor);
+    }
+  }
+
+  /// A dotted line along [stroke] (the middle level of help).
+  void _dotted(Canvas canvas, List<Offset> stroke, GlyphFit fit) {
+    final len = pathLength(stroke);
+    final dot = Paint()..color = Book.roadLine;
+    final along = Tracer(stroke);
+    for (var d = 0.0; d <= len; d += 7) {
+      canvas.drawCircle(fit.toScreen(along.pointAt(d)), 1.9 * fit.scale, dot);
     }
   }
 
