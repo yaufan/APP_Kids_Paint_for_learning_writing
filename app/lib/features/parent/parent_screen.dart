@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../app/version.dart';
 import '../../core/providers.dart';
 import '../../core/writing.dart';
+import 'parent_sections.dart';
 
 /// Parent mode (after the gate): how it is going, and the settings.
 /// Rewards and the fuller progress pages come in 0.2.
@@ -64,7 +65,9 @@ class ParentScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(Strings.allRight(g.totalRight), style: const TextStyle(fontSize: 17)),
           const SizedBox(height: 8),
+          const ProgressDetails(),
         ]),
+        section(Strings.rewards, const [RewardsEditor()]),
         section(Strings.writing, [
           const Text(Strings.strictness, style: TextStyle(fontSize: 17)),
           RadioGroup<Strictness>(
@@ -96,6 +99,26 @@ class ParentScreen extends ConsumerWidget {
                 key: const ValueKey('goal-more'),
                 icon: const Icon(Icons.add_circle_outline),
                 onPressed: s.dailyGoal < 20 ? () => game.settings((x) => x.copyWith(dailyGoal: x.dailyGoal + 1)) : null,
+              ),
+            ]),
+          ),
+        ]),
+        section(Strings.dailyTasks, [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(Strings.dailyTasks, style: TextStyle(fontSize: 17)),
+            subtitle: Text(Strings.tasksCount(s.dailyTasks), style: const TextStyle(fontSize: 13, color: Book.inkSoft)),
+            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+              IconButton(
+                key: const ValueKey('tasks-less'),
+                icon: const Icon(Icons.remove_circle_outline),
+                onPressed: s.dailyTasks > 1 ? () => game.settings((x) => x.copyWith(dailyTasks: x.dailyTasks - 1)) : null,
+              ),
+              Text('${s.dailyTasks}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              IconButton(
+                key: const ValueKey('tasks-more'),
+                icon: const Icon(Icons.add_circle_outline),
+                onPressed: s.dailyTasks < 5 ? () => game.settings((x) => x.copyWith(dailyTasks: x.dailyTasks + 1)) : null,
               ),
             ]),
           ),
